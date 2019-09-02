@@ -1,0 +1,25 @@
+
+let reverse [n] 't (x: [n]t): [n]t = undefined --x[::-1]
+
+let iota [n] (n: i32) : [n]i32 = undefined --0..<n
+
+let length [n] 't (a: [n]t) : i32(n) = undefined
+
+let const 'a 'b (x: a) (y: b): a = x
+
+--Type var recognition and renaming, bind type vars with polytype
+let map 't [n] 'x (f: t -> x) (as: [n]t): [n]x = undefined
+
+let replicate [n] 't (n: i32) (x: t): [n]t = map (const x) (iota n)
+
+let filter 'a [n] (p: a -> bool) (as: [n]a): {[m]a | m <= n} = undefined
+
+let replicated_iota [n] (reps : [n]i32) : []{i32(i) | 0 <= i && i < n} = undefined
+
+--let y (f : (i32 -> i32) -> i32) : i32 = f (\x : (i32 -> i32) -> x)
+
+--let main = segmented_replicate
+
+--let segmented_replicate [n] (reps : [n]i32) (vs : [n]i32): []i32 =
+--  let idxs = replicated_iota reps
+--  in map (\i -> vs[i]) idxs
