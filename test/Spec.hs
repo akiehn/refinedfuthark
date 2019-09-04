@@ -77,20 +77,19 @@ typeTests =
   ,testCheck "ints" "let x : [5]i32 = ints 5"
   ,testCheck "get2" "let y (x : {i32(a) | 0 <= a}): i32 = let z = x in get2 z"
   ,testCheck "get2" "let y : i32 = get2 5"
-  ,testCheck "index" "let y : i32 = let x : [5]i32 = ints 5 in x[2]"
-  -- ,testCheck "index2" "let y (z : {i32(k) | 0 <= k}): i32 = let arr = ints z let i : i32 = undefined in arr[i]"
+  ,testCheck "index" "let f (vs : [5]i32) : i32 = vs[2]"
   ,testCheck "index2" "let y [w] (arr : [w]i32) (j : {i32(h) | 0 <= h && h < w}): i32 = arr[j]"
-  ,testCheck "iota" "let y [w] (z : i32(w)) (i : {i32(k) | 0 <= k && k < w}) : i32 = let arr = iota z let j = arr[i] let arr2 = ints z in arr2[j]"
-  ,testCheck "mapIntId" "let y : [5]i32 = map idInt (ints 5)"
-  ,testCheck "mapId" "let y : [5]i32 = map (\\x -> id x) (ints 5)"
-  ,negCheck "mapIdNeg" "let y : [5]i32 = map (\\x -> id 5) (ints 5)"
-  ,testCheck "mapget" "let y : [5]i32 = let vs = ints 5 in map (\\j -> vs[j]) (iota 5)"
-  ,testCheck "mapIndex2" "let y : [5]i32 = let vs = ints 5 in map2 (iota 5) (\\j -> let jj = j in vs[jj])"
+  ,testCheck "iota" "let y [w] (z : i32(w)) (i : {i32(k) | 0 <= k && k < w}) : i32 = let arr = iota_test z let j = arr[i] let arr2 = ints z in arr2[j]"
+  -- ,testCheck "mapIntId" "let y : [5]i32 = map idInt (ints 5)"
+  ,testCheck "mapId" "let y (vs : [5]i32): [5]i32 = map (\\x -> id x) vs"
+  ,bugCheck "bugIdNeg" "let y (vs : [5]i32) : [5]i32 = map (\\x -> id 5) vs"
+  ,testCheck "mapget" "let y (vs : [5]i32) : [5]i32 = map (\\j -> vs[j]) (iota_test 5)"
+  ,testCheck "mapIndex2" "let y (vs: [5]i32) : [5]i32 = map2 (iota_test 5) (\\j -> let jj = j in vs[jj])"
   ,testCheck "id 5" "let y : i32(5) = id 5"
   ,testCheck "id a" "let y (a : i32) : i32 = id a"
-  ,testCheck "id id" "let y : i64 = let f = \\(x : i64) : i64 -> x in id f 1"
+  ,bugCheck "bug id id" "let y : i32 = let f = \\(x : i32) : i32 -> x in id f 1"
   ,testCheck "const" "let y (a : i32) : i32 = const a a"
-  ,negCheck "negConst" "let y (a : i32) : i32 = const a 5"
+  ,testCheck "litConst" "let y (a : i32) : i32 = const a 5"
   ,testCheck "segmented_replicate" "let segrep [n] (reps : [n]i32) (vs : [n]i32): []i32 = let idxs = rep_iota reps in map (\\i -> vs[i]) idxs"
   ]
 
@@ -105,6 +104,9 @@ testCheck n s = testCase n $ do
   p <- tryParse "" s
   _ <- tryTypeCheck p
   return ()
+
+bugCheck :: TestName -> String -> TestTree
+bugCheck = negCheck
 
 negCheck :: TestName -> String -> TestTree
 negCheck n s = testCase n $ do

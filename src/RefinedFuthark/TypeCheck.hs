@@ -79,7 +79,7 @@ prelude :: Context
 prelude =
   [
    ExpVar "undefined" (PolyType "_" $ UTVar "_")
-  ,ExpVar "iota" (PiType "a" IntSort (FunType (IntType (IndexVar "a")) (ArrayType (Just (IndexVar "a")) (SigType "n2" IntSort (AssertingType (IntType (IndexVar "n2")) (ILess (IndexConst 0) (IndexVar "n2") `IAnd` ISLess (IndexVar "n2") (IndexVar "a")))))))
+  ,ExpVar "iota_test" (PiType "a" IntSort (FunType (IntType (IndexVar "a")) (ArrayType (Just (IndexVar "a")) (SigType "n2" IntSort (AssertingType (IntType (IndexVar "n2")) (ILess (IndexConst 0) (IndexVar "n2") `IAnd` ISLess (IndexVar "n2") (IndexVar "a")))))))
   ,ExpVar "rep_iota" (PiType "a" IntSort (ArrayType (Just (IndexVar "a")) intType `FunType` (SigType "l" IntSort (ArrayType (Just (IndexVar "l")) (SigType "m" IntSort (AssertingType (IntType (IndexVar "m")) (ILess (IndexConst 0) (IndexVar "m") `IAnd` ISLess (IndexVar "m") (IndexVar "a"))))))))
   ,ExpVar "map" $ PolyType "a" $ PolyType "b" $ PiType "n" IntSort $ (UTVar "a" `FunType` UTVar "b") `FunType` (ArrayType (Just (IndexVar "n")) (UTVar "a") `FunType` ArrayType (Just (IndexVar "n")) (UTVar "b"))
   ,ExpVar "map2" $ PolyType "a" $ PolyType "b" $ PiType "n" IntSort $ (ArrayType (Just (IndexVar "n")) (UTVar "a") `FunType` ((UTVar "a" `FunType` UTVar "b") `FunType` ArrayType (Just (IndexVar "n")) (UTVar "b")))
@@ -101,7 +101,8 @@ prelude =
   ]
 
 intType :: TypeExp
-intType = TypeName "i32"
+intType = SigType "n" IntSort (IntType (IndexVar "n"))
+-- intType = TypeName "i32"
 
 natType :: TypeExp
 natType = SigType "n" IntSort (AssertingType (IntType (IndexVar "n")) (ILess (IndexConst 0) (IndexVar "n")))
@@ -268,6 +269,7 @@ typeEquiv (ETVar v1) (ETVar v2)
   | v1 == v2 = return ()
 typeEquiv (ETVar v) t = instType v t
 typeEquiv t (ETVar v) = instType v t
+typeEquiv (SigType _ _ t1') (SigType _ _ t2') = typeEquiv t1' t2'
 typeEquiv t1 t2 = throwError $ "Expected type " ++ prettyType t2 ++ " but got type " ++ prettyType t1
 
 indexEq :: IntIndex -> IntIndex -> TypeM ()
@@ -350,7 +352,7 @@ instType v t = case t of
     m <- getExVarMap
     instType v2 (replaceContext c m t2)
   AssertingType _ _ -> solveEVar v (ExType t)
-  _ -> error (show t)
+  _ -> throwError (show t)
 
 synthType :: HasCallStack => Exp -> TypeM TypeExp
 synthType e = case e of

@@ -33,7 +33,8 @@ transformType t  = case t of
   IntPredType ident pr -> SigType ident IntSort $ AssertingType (IntType (IndexVar ident)) pr
   ArrayPredType ident t' pr -> SigType ident IntSort $ AssertingType (ArrayType (Just (IndexVar ident)) t') pr
   IntType i -> IntType i
-  TypeName "i32" -> TypeName "i32" --SigType "n" IntSort (IntType (IndexVar "n"))
+  TypeName "i32" -> SigType "n" IntSort (IntType (IndexVar "n"))
+  TypeName "i32" -> TypeName "i32"
   TypeName v -> UTVar v
   FunType t1 t2 -> FunType (transformType t1) (transformType t2)
   _ -> error (show t)
